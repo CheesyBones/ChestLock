@@ -1,0 +1,14 @@
+name: Chestlock
+version: '${project.version}'
+main: me.cheesybones.chestlock.Main
+api-version: 1.18
+authors: [ CheesyBones ]
+description: Plugin that allows players to lock their in game chests.
+website: charliedt.net
+commands:
+  lockchest:
+    usage: /<command>
+    description: Allows you to lock the chest you are currently looking at
+  addmember:
+    usage: /<command> PlayerName
+    description: Allows you to add another player to your locked chest

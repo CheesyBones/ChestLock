@@ -1,31 +1,37 @@
 package me.cheesybones.chestlock;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.block.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.block.DoubleChest;
+import org.bukkit.block.TileState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.persistence.PersistentDataContainer;
-import static me.cheesybones.chestlock.BlockHelper.*;
 
-public class ChestBreak implements Listener {
+import static me.cheesybones.chestlock.BlockHelper.checkChestMembers;
+import static me.cheesybones.chestlock.BlockHelper.checkChestOwner;
+import static me.cheesybones.chestlock.BlockHelper.checkChestAccess;
+
+public class ChestOpen implements Listener {
+
     @EventHandler
-    public void onBreak(BlockBreakEvent event){
+    public void onOpen(PlayerInteractEvent event){
+        if(!event.hasBlock()){
+            return;
+        }
+        if(event.getClickedBlock().getType() != Material.CHEST){
+            return;
+        }
+        if(!(event.getClickedBlock().getState() instanceof TileState)){
+            return;
+        }
         Player player = event.getPlayer();
-        Block block = event.getBlock();
-
-        if(block.getType() != Material.CHEST) {return;}
-        if(!(block.getState() instanceof TileState)){return;}
-
-        TileState tileState = (TileState) block.getState();
-        PersistentDataContainer container = tileState.getPersistentDataContainer();
-
-        NamespacedKey ownerKey = new NamespacedKey(Main.getPlugin(Main.class),"owner");
-        NamespacedKey membersKey = new NamespacedKey(Main.getPlugin(Main.class),"members");
+        Block block = event.getClickedBlock();
         Chest chest = (Chest) block.getState();
         InventoryHolder holder = chest.getInventory().getHolder();
         if(holder instanceof DoubleChest){

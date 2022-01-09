@@ -57,7 +57,7 @@ public class AddMembersCommand implements CommandExecutor {
             uuid = Bukkit.getOfflinePlayer(args[0]).getUniqueId().toString();
         }catch(Exception exception){
             Bukkit.getLogger().info("Error in getting playername from uuid " + exception.toString());
-            player.sendMessage(ChatColor.RED + "Error in adding player to chest");
+            player.sendMessage(ChatColor.RED + "Error in getting player");
             return false;
         }
 
@@ -73,7 +73,7 @@ public class AddMembersCommand implements CommandExecutor {
             String newMemberString = String.join(",",membersList);
             container.set(membersKey,PersistentDataType.STRING,newMemberString);
         }
-
+        player.sendMessage(ChatColor.DARK_AQUA + "Added " + ChatColor.GOLD + args[0] + ChatColor.DARK_AQUA + " to chest");
 
         tileState.update();
         return true;

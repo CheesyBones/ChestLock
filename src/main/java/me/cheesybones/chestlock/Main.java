@@ -22,5 +22,6 @@ public final class Main extends JavaPlugin {
 
     private void registerListeners(){
         getServer().getPluginManager().registerEvents(new ChestBreak(),this);
+        getServer().getPluginManager().registerEvents(new ChestOpen(),this);
     }
 }

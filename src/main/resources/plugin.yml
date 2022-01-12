@@ -9,6 +9,9 @@ commands:
   lockchest:
     usage: /<command>
     description: Allows you to lock the chest you are currently looking at
+  unlockchest:
+    usage: /<command>
+    description: Allows you to unlock the chest you are currently looking at
   addmember:
     usage: /<command> PlayerName
     description: Allows you to add another player to your locked chest

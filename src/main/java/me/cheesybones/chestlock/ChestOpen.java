@@ -13,8 +13,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.InventoryHolder;
 
-import static me.cheesybones.chestlock.BlockHelper.checkChestMembers;
-import static me.cheesybones.chestlock.BlockHelper.checkChestOwner;
 import static me.cheesybones.chestlock.BlockHelper.checkChestAccess;
 
 public class ChestOpen implements Listener {

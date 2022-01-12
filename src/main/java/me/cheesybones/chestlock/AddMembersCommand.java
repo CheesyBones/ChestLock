@@ -48,10 +48,10 @@ public class AddMembersCommand implements CommandExecutor {
             player.sendMessage("This chest is not locked!");
             return false;
         }
-        if(!container.get(ownerKey,PersistentDataType.STRING).equalsIgnoreCase(player.getUniqueId().toString())){
+        /*if(!container.get(ownerKey,PersistentDataType.STRING).equalsIgnoreCase(player.getUniqueId().toString())){
             player.sendMessage(ChatColor.RED + "You do not have permission to add members to this chest!");
             return false;
-        }
+        }*/
         String uuid;
         try{
             uuid = Bukkit.getOfflinePlayer(args[0]).getUniqueId().toString();

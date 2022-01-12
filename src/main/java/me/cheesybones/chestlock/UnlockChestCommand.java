@@ -1,10 +1,12 @@
 package me.cheesybones.chestlock;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.block.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.block.DoubleChest;
+import org.bukkit.block.TileState;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -12,11 +14,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.util.BlockIterator;
 
 import static me.cheesybones.chestlock.BlockHelper.getTargetBlock;
 
-public class LockChestCommand implements CommandExecutor {
+public class UnlockChestCommand implements CommandExecutor {
     NamespacedKey ownerKey = new NamespacedKey(Main.getPlugin(Main.class),"owner");
 
     @Override
@@ -36,44 +37,45 @@ public class LockChestCommand implements CommandExecutor {
             return false;
         }
 
+        boolean success;
         Chest chest = (Chest) targetBlock.getState();
         InventoryHolder holder = chest.getInventory().getHolder();
-        boolean success;
         if(holder instanceof DoubleChest){
             DoubleChest doubleChest = ((DoubleChest) holder);
             Chest rightChest = (Chest) doubleChest.getRightSide();
             Chest leftChest = (Chest) doubleChest.getLeftSide();
-            lockChest((TileState) rightChest.getBlock().getState(),player,args);
-            success = lockChest((TileState) leftChest.getBlock().getState(),player,args);
+            unlockChest((TileState) rightChest.getBlock().getState(),player);
+            success = unlockChest((TileState) leftChest.getBlock().getState(),player);
 
         }else{
             TileState tileState = (TileState) targetBlock.getState();
-            success = lockChest(tileState,player,args);
-        }
 
+            success = unlockChest(tileState,player);
+        }
         if(success){
-            player.sendMessage(ChatColor.DARK_AQUA + "Chest successfully locked");
+            player.sendMessage(ChatColor.GOLD + "Chest successfully unlocked!");
             return true;
         }else{
-            player.sendMessage(ChatColor.RED + "You cannot lock this chest");
+            player.sendMessage(ChatColor.RED + "This chest cannot be unlocked");
             return false;
         }
+
 
     }
 
-    private boolean lockChest(TileState tileState,Player player,String[] args){
+    private boolean unlockChest(TileState tileState,Player player){
         PersistentDataContainer container = tileState.getPersistentDataContainer();
-        if(container.has(ownerKey, PersistentDataType.STRING)){
+
+        if(container.has(ownerKey, PersistentDataType.STRING)) {
+            String uuid = container.get(ownerKey, PersistentDataType.STRING);
+            if (uuid.equalsIgnoreCase(player.getUniqueId().toString())) {
+                BlockHelper.clearChestKeys(container, tileState);
+                return true;
+            } else {
+                return false;
+            }
+        }else{
             return false;
         }
-        String returnMsg;
-        if(args.length == 0){ // this is a debug feature, remove in actual build
-            container.set(ownerKey, PersistentDataType.STRING,player.getUniqueId().toString());
-
-        }else{
-            container.set(ownerKey,PersistentDataType.STRING,args[0]);
-        }
-        tileState.update();
-        return true;
     }
 }

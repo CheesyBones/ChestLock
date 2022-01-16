@@ -70,6 +70,8 @@ public class UnlockChestCommand implements CommandExecutor {
             String uuid = container.get(ownerKey, PersistentDataType.STRING);
             if (uuid.equalsIgnoreCase(player.getUniqueId().toString())) {
                 BlockHelper.clearChestKeys(container, tileState);
+
+                tileState.update();
                 return true;
             } else {
                 return false;

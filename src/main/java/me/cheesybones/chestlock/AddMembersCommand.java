@@ -5,11 +5,14 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.block.DoubleChest;
 import org.bukkit.block.TileState;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -19,7 +22,11 @@ import java.util.List;
 
 import static me.cheesybones.chestlock.BlockHelper.getTargetBlock;
 
+
 public class AddMembersCommand implements CommandExecutor {
+
+    NamespacedKey ownerKey = new NamespacedKey(Main.getPlugin(Main.class),"owner");
+    NamespacedKey membersKey = new NamespacedKey(Main.getPlugin(Main.class),"members");
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if(!(sender instanceof Player)){
@@ -37,21 +44,8 @@ public class AddMembersCommand implements CommandExecutor {
             return false;
         }
 
-        TileState tileState = (TileState) targetBlock.getState();
+        //TileState tileState = (TileState) targetBlock.getState();
 
-        PersistentDataContainer container = tileState.getPersistentDataContainer();
-
-        NamespacedKey ownerKey = new NamespacedKey(Main.getPlugin(Main.class),"owner");
-        NamespacedKey membersKey = new NamespacedKey(Main.getPlugin(Main.class),"members");
-
-        if(!container.has(ownerKey,PersistentDataType.STRING)) {
-            player.sendMessage("This chest is not locked!");
-            return false;
-        }
-        /*if(!container.get(ownerKey,PersistentDataType.STRING).equalsIgnoreCase(player.getUniqueId().toString())){
-            player.sendMessage(ChatColor.RED + "You do not have permission to add members to this chest!");
-            return false;
-        }*/
         String uuid;
         try{
             uuid = Bukkit.getOfflinePlayer(args[0]).getUniqueId().toString();
@@ -60,6 +54,42 @@ public class AddMembersCommand implements CommandExecutor {
             player.sendMessage(ChatColor.RED + "Error in getting player");
             return false;
         }
+
+        Chest chest = (Chest) targetBlock.getState();
+        InventoryHolder holder = chest.getInventory().getHolder();
+        boolean success;
+        if(holder instanceof DoubleChest){
+            DoubleChest doubleChest = ((DoubleChest) holder);
+            Chest rightChest = (Chest) doubleChest.getRightSide();
+            Chest leftChest = (Chest) doubleChest.getLeftSide();
+            addMember((TileState) rightChest.getBlock().getState(),uuid,player);
+            success = addMember((TileState) leftChest.getBlock().getState(),uuid,player);
+
+        }else{
+            TileState tileState = (TileState) targetBlock.getState();
+            success = addMember(tileState,uuid,player);
+        }
+
+        if(success){
+            player.sendMessage(ChatColor.DARK_AQUA + "Added " + ChatColor.GOLD + args[0] + ChatColor.DARK_AQUA + " to chest");
+            return true;
+        }else{
+            player.sendMessage(ChatColor.RED + "You cannot add " + ChatColor.GOLD + args[0] + ChatColor.DARK_AQUA + " to chest");
+            return false;
+        }
+
+    }
+
+    private boolean addMember(TileState tileState, String uuid,Player player){
+        PersistentDataContainer container = tileState.getPersistentDataContainer();
+
+        if(!container.has(ownerKey,PersistentDataType.STRING)) {
+            return false;
+        }
+
+        /*if(!container.get(ownerKey,PersistentDataType.STRING).equalsIgnoreCase(player.getUniqueId().toString())){
+            return false;
+        }*/
 
         if(container.has(membersKey,PersistentDataType.STRING)){
             String membersString = container.get(membersKey,PersistentDataType.STRING);
@@ -73,8 +103,6 @@ public class AddMembersCommand implements CommandExecutor {
             String newMemberString = String.join(",",membersList);
             container.set(membersKey,PersistentDataType.STRING,newMemberString);
         }
-        player.sendMessage(ChatColor.DARK_AQUA + "Added " + ChatColor.GOLD + args[0] + ChatColor.DARK_AQUA + " to chest");
-
         tileState.update();
         return true;
     }

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static me.cheesybones.chestlock.BlockHelper.checkChestAccess;
 import static me.cheesybones.chestlock.BlockHelper.getTargetBlock;
 
 
@@ -62,8 +63,14 @@ public class AddMembersCommand implements CommandExecutor {
             DoubleChest doubleChest = ((DoubleChest) holder);
             Chest rightChest = (Chest) doubleChest.getRightSide();
             Chest leftChest = (Chest) doubleChest.getLeftSide();
-            addMember((TileState) rightChest.getBlock().getState(),uuid,player);
-            success = addMember((TileState) leftChest.getBlock().getState(),uuid,player);
+
+            if(!checkChestAccess(leftChest.getBlock(),player) || !checkChestAccess(rightChest.getBlock(),player)){
+                success = false;
+            }else{
+                addMember((TileState) rightChest.getBlock().getState(),uuid,player);
+                success = addMember((TileState) leftChest.getBlock().getState(),uuid,player);
+            }
+
 
         }else{
             TileState tileState = (TileState) targetBlock.getState();
@@ -87,9 +94,9 @@ public class AddMembersCommand implements CommandExecutor {
             return false;
         }
 
-        /*if(!container.get(ownerKey,PersistentDataType.STRING).equalsIgnoreCase(player.getUniqueId().toString())){
+        if(!container.get(ownerKey,PersistentDataType.STRING).equalsIgnoreCase(player.getUniqueId().toString())){
             return false;
-        }*/
+        }
 
         if(container.has(membersKey,PersistentDataType.STRING)){
             String membersString = container.get(membersKey,PersistentDataType.STRING);

@@ -15,6 +15,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import static me.cheesybones.chestlock.BlockHelper.checkChestAccess;
 import static me.cheesybones.chestlock.BlockHelper.getTargetBlock;
 
 public class UnlockChestCommand implements CommandExecutor {
@@ -44,8 +45,12 @@ public class UnlockChestCommand implements CommandExecutor {
             DoubleChest doubleChest = ((DoubleChest) holder);
             Chest rightChest = (Chest) doubleChest.getRightSide();
             Chest leftChest = (Chest) doubleChest.getLeftSide();
-            unlockChest((TileState) rightChest.getBlock().getState(),player);
-            success = unlockChest((TileState) leftChest.getBlock().getState(),player);
+            if(!checkChestAccess(leftChest.getBlock(),player) || !checkChestAccess(rightChest.getBlock(),player)){
+                success = false;
+            }else {
+                unlockChest((TileState) rightChest.getBlock().getState(), player);
+                success = unlockChest((TileState) leftChest.getBlock().getState(), player);
+            }
 
         }else{
             TileState tileState = (TileState) targetBlock.getState();

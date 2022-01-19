@@ -19,6 +19,7 @@ public final class Main extends JavaPlugin {
         getServer().getPluginCommand("lockchest").setExecutor(new LockChestCommand());
         getServer().getPluginCommand("addmember").setExecutor(new AddMembersCommand());
         getServer().getPluginCommand("unlockchest").setExecutor(new UnlockChestCommand());
+        getServer().getPluginCommand("removemember").setExecutor(new RemoveMemberCommand());
     }
 
     private void registerListeners(){

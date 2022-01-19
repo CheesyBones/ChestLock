@@ -15,3 +15,7 @@ commands:
   addmember:
     usage: /<command> PlayerName
     description: Allows you to add another player to your locked chest
+  removemember:
+    aliases: [deletemember]
+    usage: /<command> PlayerName
+    description: Removes specified member by username from your locked chest

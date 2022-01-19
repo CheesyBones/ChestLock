@@ -40,6 +40,21 @@ public class BlockHelper {
         tileState.update();
     }
 
+    public static boolean checkChestOwnership(Block block, Player player){
+        TileState tileState = (TileState) block.getState();
+        PersistentDataContainer container = tileState.getPersistentDataContainer();
+        if (container.has(ownerKey, PersistentDataType.STRING)) {
+            String owner = container.get(ownerKey,PersistentDataType.STRING);
+            if(owner.equalsIgnoreCase(player.getUniqueId().toString())){
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+
     public static boolean checkChestAccess(Block block,Player player){
         TileState tileState = (TileState) block.getState();
         PersistentDataContainer container = tileState.getPersistentDataContainer();

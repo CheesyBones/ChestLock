@@ -21,10 +21,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import static me.cheesybones.chestlock.BlockHelper.*;
+import static me.cheesybones.chestlock.BlockHelper.checkChestOwnership;
 
-
-public class AddMembersCommand implements CommandExecutor {
-
+public class RemoveMemberCommand implements CommandExecutor {
     NamespacedKey ownerKey = new NamespacedKey(Main.getPlugin(Main.class),"owner");
     NamespacedKey membersKey = new NamespacedKey(Main.getPlugin(Main.class),"members");
     @Override
@@ -43,8 +42,6 @@ public class AddMembersCommand implements CommandExecutor {
         if(!(targetBlock.getState() instanceof TileState)){
             return false;
         }
-
-        //TileState tileState = (TileState) targetBlock.getState();
 
         String uuid;
         try{
@@ -66,30 +63,30 @@ public class AddMembersCommand implements CommandExecutor {
             if(!checkChestOwnership(leftChest.getBlock(),player) || !checkChestOwnership(rightChest.getBlock(),player)){
                 success = false;
             }else{
-                addMember((TileState) rightChest.getBlock().getState(),uuid,player);
-                success = addMember((TileState) leftChest.getBlock().getState(),uuid,player);
+                removeMember((TileState) rightChest.getBlock().getState(),uuid,player);
+                success = removeMember((TileState) leftChest.getBlock().getState(),uuid,player);
             }
 
 
         }else{
             TileState tileState = (TileState) targetBlock.getState();
-            success = addMember(tileState,uuid,player);
+            success = removeMember(tileState,uuid,player);
         }
 
         if(success){
-            player.sendMessage(ChatColor.DARK_AQUA + "Added " + ChatColor.GOLD + args[0] + ChatColor.DARK_AQUA + " to chest");
+            player.sendMessage(ChatColor.DARK_AQUA + "Removed " + ChatColor.GOLD + args[0] + ChatColor.DARK_AQUA + " from chest");
             return true;
         }else{
-            player.sendMessage(ChatColor.RED + "You cannot add " + ChatColor.GOLD + args[0] + ChatColor.DARK_AQUA + " to chest");
+            player.sendMessage(ChatColor.RED + "You cannot remove " + ChatColor.GOLD + args[0] + ChatColor.DARK_AQUA + " to chest");
             return false;
         }
 
     }
 
-    private boolean addMember(TileState tileState, String uuid,Player player){
+    private boolean removeMember(TileState tileState, String uuid,Player player){
         PersistentDataContainer container = tileState.getPersistentDataContainer();
 
-        if(!container.has(ownerKey,PersistentDataType.STRING)) {
+        if(!container.has(ownerKey, PersistentDataType.STRING)) {
             return false;
         }
 
@@ -97,19 +94,23 @@ public class AddMembersCommand implements CommandExecutor {
             return false;
         }
 
-        if(container.has(membersKey,PersistentDataType.STRING)){
-            String membersString = container.get(membersKey,PersistentDataType.STRING);
-            List<String> membersList = new ArrayList<String>(Arrays.asList(membersString.split(",")));
-            membersList.add(uuid);
-            String newMemberString = String.join(",",membersList);
-            container.set(membersKey,PersistentDataType.STRING,newMemberString);
-        }else{
-            List<String> membersList = new ArrayList<String>();
-            membersList.add(uuid);
-            String newMemberString = String.join(",",membersList);
-            container.set(membersKey,PersistentDataType.STRING,newMemberString);
+        if(!container.has(membersKey,PersistentDataType.STRING)){
+            return false;
         }
+
+        String membersString = container.get(membersKey,PersistentDataType.STRING);
+        List<String> membersList = new ArrayList<String>(Arrays.asList(membersString.split(",")));
+
+        if(!membersList.contains(uuid)){
+            return false;
+        }
+
+        membersList.remove(new String(uuid));
+        String newMemberString = String.join(",",membersList);
+        container.set(membersKey,PersistentDataType.STRING,newMemberString);
+
         tileState.update();
+
         return true;
     }
 }
